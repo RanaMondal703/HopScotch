@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:15
+    container_name: hoppscotch-db
+    restart: always
+    environment:
+      POSTGRES_DB: hopscotch
+      POSTGRES_USER: sail
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: hoppscotch-mailpit
+    restart: always
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
+  backend:
+    image: hoppscotch/hoppscotch-backend:latest
+    container_name: hoppscotch-backend
+    depends_on:
+      - db
+      - mailpit
+    env_file:
+      - .env
+    ports:
+      - "3170:3170"
+    restart: always
+
+  frontend:
+    image: hoppscotch/hoppscotch-frontend:latest
+    container_name: hoppscotch-frontend
+    depends_on:
+      - backend
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    restart: always
+
+volumes:
+  db_data:
